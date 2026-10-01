@@ -262,6 +262,6 @@ def decision_node(state):
     if alert:
         msg = f"HIGH-CONFIDENCE ALERT: {action} {n['asset']} at {conf}% (> {threshold}%)"
         alert_log.warning(msg)
-        print(f"🚨 {msg}")
+        print(f"[ALERT] {msg}")
         trace.append(f"[Decision Agent] alert emitted (threshold {threshold})")
     return {"decision": decision, "alert": alert, "trace": trace}

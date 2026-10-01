@@ -182,7 +182,8 @@ with st.sidebar:
             st.rerun()
 
 tab_run, tab_art, tab_port, tab_bt, tab_chat, tab_kb = st.tabs(
-    ["📡 Signals", "🤖 Artefacts", "📊 Portfolio", "🧪 Backtest", "💬 Ask", "🔎 Knowledge Base"])
+    ["📡 Signals", "🤖 Artefacts", "📊 Portfolio", "🧪 Backtest", "💬 Ask", "🔎 Knowledge Base"],
+    key="main_tabs")
 
 # =============================================================================== signals tab
 with tab_run:
