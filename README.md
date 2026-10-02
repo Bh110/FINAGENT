@@ -72,7 +72,7 @@ structured decision artefacts, and observable agent execution.
 | Evaluation             | Backtest, portfolio, Ask tabs | Lets a reviewer question and check artefacts after the fact                                         |
 
 3. Architecture
-
+```
                          FinAgent
 
                   +---------------------+
@@ -124,7 +124,7 @@ structured decision artefacts, and observable agent execution.
           v                v          v
       Portfolio        Backtest     Ask
 
-
+```
 
 > **Note on this diagram:** this is hand-drawn for readability, not generated from the
 > compiled graph object. Auto-generating it via `graph.get_graph().draw_mermaid()` is listed
