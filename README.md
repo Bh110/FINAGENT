@@ -385,7 +385,7 @@ workflow, so retrieval quality can be judged separately from LLM reasoning.
 | Data processing           | Pandas                                     | Market data loading and transformation                |
 | Language                  | Python                                     | Implementation                                        |
 12. Project Structure
-
+```
 FINAGENT/
 ├── app.py
 ├── config.py
@@ -441,7 +441,7 @@ ollama pull llama3.2:3b          # if not already pulled
 
 ```
 
-### macOS / Linux
+macOS / Linux
 
 ```bash
 python3 -m venv .venv
@@ -469,7 +469,7 @@ Troubleshooting
 
 ---
 
-## 14. Configuration Reference
+14. Configuration Reference
 
 All tunables live in `config.py`. Read the current values there directly — they're not
 repeated here with fixed numbers, to avoid this document drifting out of sync with the code
@@ -485,7 +485,7 @@ repeated here with fixed numbers, to avoid this document drifting out of sync wi
 
 ---
 
-## 15. Testing
+15. Testing
 
 ```bash
 python -m tests.run_all                 # core suite
@@ -504,7 +504,7 @@ informational and does not fail any test.
 
 ---
 
-## 16. Evaluation Results (the one real run)
+16. Evaluation Results (the one real run)
 
 This is the complete, actual evaluation output — nothing here is extrapolated or rounded up
 from a larger claimed run.
@@ -524,10 +524,7 @@ this section as "the plumbing works," not "the system is accurate."
 Wilson confidence intervals on hit rate, calibration analysis (does a higher confidence
 bucket actually hit more often), and ablations (LLM vs. quant-only, with/without RAG,
 with/without news).
-
----
-
-## 17. Limitations
+17. Limitations
 
 Market data is simulated or supplied, not a continuously validated live feed.
 The local 3B model's reasoning quality depends heavily on what's fed to it; the fallback layers exist precisely because it is not reliable on its own.
@@ -539,26 +536,20 @@ No statistical evaluation (baselines, calibration, ablations) has been run yet �
 Retrieval is dense-only; no hybrid BM25 fusion yet, and the document corpus is too small for a meaningful retrieval benchmark.
 No structured trace schema or persistent rotating logs yet — the trace exists in the UI and in exported JSON, but isn't yet schema-validated.
 
-### Future work, roughly in priority order
+Future work, roughly in priority order
 
 1. Run the statistical evaluation (baselines + Wilson intervals + calibration) on a larger, still-simulated dataset, and report the honest result either way.
 2. Expand the document corpus and add a retrieval benchmark (Recall\@k, MRR).
 3. Auto-generate the Mermaid diagram from the compiled graph so the architecture diagram can never drift from the real code.
 4. Add a structured trace schema and rotating file logs.
 5. Prompt-injection hardening and tests against the retrieved document text.
-
----
-
-## 18. Compliance and Safety
+18. Compliance and Safety
 
 Not connected to any brokerage; places no orders.
 Not a source of financial advice; outputs are decision-support artefacts for inspection, not recommendations to act on.
 The demonstration Apex Technologies document is explicitly synthetic, created for retrieval testing, and is not a real company filing.
 No prohibited components from the problem statement are present: no single-LLM bypass of the multi-agent structure, no code-generation/execution agents, no live trading, no paid data dependency as a primary source.
-
----
-
-## 19. FAQ
+19. FAQ
 
 **Is this really real-time?**
 No — it's a simulated CSV replay that the user (or a timed replay loop) triggers. "Real-time
@@ -611,9 +602,7 @@ Rigorous evaluation. The architecture, fallbacks, and observability are solid; t
 statistical evidence for "does this actually work well" doesn't exist yet beyond one small
 backtest run.
 
----
-
-## 20. Reproducible Evaluation Flow
+20. Reproducible Evaluation Flow
 
 ```text
 Install dependencies → Start Ollama → Launch Streamlit → Open Signals
