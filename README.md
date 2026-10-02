@@ -602,7 +602,7 @@ Rigorous evaluation. The architecture, fallbacks, and observability are solid; t
 statistical evidence for "does this actually work well" doesn't exist yet beyond one small
 backtest run.
 
-20. Reproducible Evaluation Flow
+17. Reproducible Evaluation Flow
 
 ```text
 Install dependencies → Start Ollama → Launch Streamlit → Open Signals
