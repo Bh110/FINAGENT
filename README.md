@@ -1,6 +1,6 @@
-# FinAgent
+FinAgent
 
-### Real-Time AI Investment Decision System — Multi-Agent · RAG · LangGraph
+Real-Time AI Investment Decision System — Multi-Agent · RAG · LangGraph
 
 FinAgent is a local, multi-agent decision-support system that connects numerical market
 signals with the qualitative context buried in financial documents. A price move alone
@@ -11,7 +11,7 @@ evidence into one auditable pipeline instead of one opaque prompt.
 **This is a simulation and research prototype.** It does not place trades, does not connect
 to a brokerage, and its output is not financial advice.
 
-> **Documentation status (read this first).** This README documents the actual, verified
+> **Documentation status** This README documents the actual, verified
 > state of the project. Section 0 below lists exactly what has been run and confirmed, and
 > what is designed but not yet executed. Nothing in this document reports a number, metric,
 > or test result that wasn't actually produced by the system. Where a planned capability
@@ -20,7 +20,7 @@ to a brokerage, and its output is not financial advice.
 
 ---
 
-## 0. What's actually verified vs. what's designed but not yet run
+0. What's actually verified vs. what's designed but not yet run
 
 Being explicit about this is the point of this README, since there is no video or deck to
 fall back on.
@@ -43,10 +43,7 @@ fall back on.
 If you are evaluating this project, §16 (Evaluation Results) is the one section with
 numbers from an actual run. Everything beyond that in "evaluation science" is future work,
 honestly labeled as such throughout this document.
-
----
-
-## 1. Problem Definition
+1. Problem Definition
 
 Financial information arrives at different levels of structure: numerical ticks (price,
 change, volume), unstructured text (headlines), and semi-structured documents (reports,
@@ -64,10 +61,7 @@ a structured, inspectable artefact.
 This follows the FinAgent mock problem statement's requirements: LangChain, LangGraph, an
 open-source vector store, an open-source embedding model, a dedicated retrieval agent,
 structured decision artefacts, and observable agent execution.
-
----
-
-## 2. System Overview
+2. System Overview
 
 | Layer Technology Role  |                               |                                                                                                     |
 | ---------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -77,11 +71,8 @@ structured decision artefacts, and observable agent execution.
 | Reasoning              | Llama 3.2 3B (Ollama, local)  | Generates the sentiment/hypothesis proposal — not the final decision                                |
 | Evaluation             | Backtest, portfolio, Ask tabs | Lets a reviewer question and check artefacts after the fact                                         |
 
----
+3. Architecture
 
-## 3. Architecture
-
-```text
                          FinAgent
 
                   +---------------------+
@@ -133,7 +124,7 @@ structured decision artefacts, and observable agent execution.
           v                v          v
       Portfolio        Backtest     Ask
 
-```
+
 
 > **Note on this diagram:** this is hand-drawn for readability, not generated from the
 > compiled graph object. Auto-generating it via `graph.get_graph().draw_mermaid()` is listed
@@ -143,7 +134,7 @@ The important property is that the model is **one component**, not the whole sys
 Retrieval, state management, confidence scoring, and the decision policy are explicit code,
 not something the LLM is trusted to do correctly on its own.
 
-### 3.1 Shared state
+3.1 Shared state
 
 Agents communicate **only** through one typed state object — never by calling each other's
 functions directly. This is what makes the trace and the "why did it do that" story
@@ -159,7 +150,7 @@ possible.
 | `decision`, `alert`                              | Decision                 | UI                  | the final artefact and whether it crosses the alert threshold |
 | `trace`, `errors`                                | every node (append-only) | UI                  | full execution log; no agent can overwrite another's entries  |
 
-### 3.2 Routing (the conditional edges)
+ 3.2 Routing (the conditional edges)
 
 **Ingestion → Retrieval**, only if the signal passes validation (non-empty asset, positive price, non-negative volume). An invalid signal routes straight to `END` with a logged reason — the pipeline never guesses at bad input.
 **Analysis → Retrieval (retry, bounded to one pass)**, only when the retrieved evidence was weak *and* confidence came out low *and* the knowledge base was actually reachable. The retry refines the query using the hypothesis just produced and relaxes the relevance threshold slightly — it is a second, smarter attempt, not a blind repeat.
@@ -172,16 +163,16 @@ compliance with a stricter reading of the problem statement.
 
 ---
 
-## 4. The Four Agents
+4. The Four Agents
 
-### Ingestion Agent
+Ingestion Agent
 
 **Input:** raw signal dict. **Output:** `normalized`, `valid`, `query`.
 Validates and timestamps the signal, builds price/volume history context for replayed data,
 and constructs the initial retrieval query. On invalid input, it fails loudly and routes to
 `END` rather than letting a bad signal flow downstream.
 
-### Retrieval Agent
+Retrieval Agent
 
 **Input:** `query`, `normalized.asset`. **Output:** `retrieved_documents`, `kb_available`.
 Embeds the query with Sentence Transformers (`all-MiniLM-L6-v2`), searches FAISS, and
@@ -189,7 +180,7 @@ returns passages with source file, page, and relevance score. If the knowledge b
 missing or errors, this is caught and logged as a fallback event — the pipeline continues
 with empty evidence rather than crashing.
 
-### Analysis Agent
+Analysis Agent
 
 **Input:** `normalized`, `retrieved_documents`. **Output:** `analysis` (sentiment,
 hypothesis, time horizon, confidence, risk flags).
@@ -197,7 +188,7 @@ Calls the local LLM with the signal and retrieved context, asking for structured
 the LLM is unreachable or returns unusable text, a rule-based fallback runs instead — the
 pipeline never halts because the model failed.
 
-### Decision Agent
+Decision Agent
 
 **Input:** `analysis`, `retrieved_documents`. **Output:** `decision`, `alert`.
 Converts the hypothesis into one of **BUY / SELL / HOLD / WATCH**, assembles 2–3 evidence
@@ -205,11 +196,8 @@ bullets from real data (not LLM-written text, so they can't be hallucinated), co
 flags (contradicting indicators, missing evidence, LLM not used), and decides whether to
 fire an alert.
 
----
+5. Retrieval-Augmented Generation
 
-## 5. Retrieval-Augmented Generation
-
-```text
 Financial document
         |
         v
@@ -233,8 +221,6 @@ Ranked passages with source + page metadata
         v
 Analysis workflow
 
-```
-
 The demonstration knowledge base contains financial PDF material, including a synthetic
 Apex Technologies Ltd. report. A query about major risks returns passages covering
 competition, cybersecurity, regulation, customer concentration, supply chain, and
@@ -254,10 +240,7 @@ match is treated as "no evidence," not forced evidence.
 BM25-plus-dense comparison. The current corpus (a handful of PDFs, \~8 chunks) is also too
 small for such a benchmark to be meaningful yet; this needs a larger, legitimately sourced
 document set first.
-
----
-
-## 6. Confidence: how the number is actually built
+6. Confidence: how the number is actually built
 
 Confidence is treated as a separate analytical quantity, not a copy of whatever number the
 LLM states. Four independent signals are blended:
@@ -297,9 +280,7 @@ calibrated probability. It has not been validated against enough outcomes to cla
 calibration (see §0 and §16). Treat it as a ranking signal, not a probability of being
 right.
 
----
-
-## 7. Requirements Traceability
+7. Requirements Traceability
 
 | Problem statement requirement Implementation Verified how Status                        |                                                 |                                                              |                                                            |
 | --------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
@@ -318,10 +299,7 @@ right.
 | No prohibited components (single-LLM bypass, code-exec agents, live trading, paid data) | N/A by design                                   | Code review                                                  |  Done                                                     |
 | Statistical evaluation (baselines, calibration, ablations)                              | —                                               | —                                                            |  Not done                                                 |
 | Hybrid retrieval, retrieval benchmark                                                   | —                                               | —                                                            |  Not done                                                 |
-
----
-
-## 8. One Real Run, Annotated
+8. One Real Run, Annotated
 
 This is the one full, real walkthrough that has actually been captured. It is deliberately
 left exactly as it ran rather than padded out with a more impressive invented example.
@@ -341,10 +319,7 @@ confidence into BUY/SELL territory. That's the system working as designed — se
 second one that actually crosses the alert threshold) directly in this document, so a
 reader can see the exact trace lines and retrieved text without re-running the app
 themselves.
-
----
-
-## 9. Design Decisions
+ 9. Design Decisions
 
 Short decision records — context, what was considered, what was chosen, and the trade-off
 accepted.
@@ -377,10 +352,7 @@ plainly rather than implied otherwise.
 Simulated or supplied CSV data keeps the system compliant with the problem statement's
 explicit prohibition on live trading, and keeps evaluation deterministic. It means the
 backtest results (§16) describe pipeline behaviour, not market-beating performance.
-
----
-
-## 10. Application Capabilities
+10. Application Capabilities
 
 **Signals** — simulated replay and manual signal entry; edit price/change/volume before
 running; analyse the latest signal per asset.
@@ -400,10 +372,7 @@ risks?", "what evidence influenced this?"), grounded in that artefact's own data
 
 **Knowledge Base** — query the retrieval layer directly, independent of the decision
 workflow, so retrieval quality can be judged separately from LLM reasoning.
-
----
-
-## 11. Technology Stack
+11. Technology Stack
 
 | Layer Technology Purpose  |                                            |                                                       |
 | ------------------------- | ------------------------------------------ | ----------------------------------------------------- |
@@ -415,12 +384,8 @@ workflow, so retrieval quality can be judged separately from LLM reasoning.
 | Vector search             | FAISS                                      | Local similarity search                               |
 | Data processing           | Pandas                                     | Market data loading and transformation                |
 | Language                  | Python                                     | Implementation                                        |
+12. Project Structure
 
----
-
-## 12. Project Structure
-
-```text
 FINAGENT/
 ├── app.py
 ├── config.py
@@ -492,7 +457,7 @@ streamlit run app.py
 Open the address Streamlit prints, normally `http://localhost:8501` (the port may shift if
 that one is already in use).
 
-### Troubleshooting
+Troubleshooting
 
 | Symptom Likely cause Fix                                    |                                                    |                                                                    |
 | ----------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
@@ -656,25 +621,4 @@ Install dependencies → Start Ollama → Launch Streamlit → Open Signals
    → Query the Knowledge Base directly → Ask a follow-up question
    → Review Portfolio aggregation → Run Backtest → Run the test suite
 
-```
 
-Short enough to walk through live, and it touches every major component.
-
----
-
-## 21. Submission Notes
-
-Submit as a locally runnable application with complete source code, dependency
-specification, demonstration data, and this documentation. Do not commit the virtual
-environment or any secrets/API keys.
-
----
-
-## Closing
-
-The central engineering idea here isn't "use an LLM on financial text." It's the separation
-of evidence acquisition, reasoning, decision synthesis, and evaluation into distinct,
-inspectable stages, connected only through shared state — so that when something looks
-wrong, you can point to exactly which stage produced it, rather than guessing at a single
-model's reasoning. What's built works and is tested; what's labeled not-done in this README
-is the honest list of what separates a working prototype from a rigorously evaluated one.
